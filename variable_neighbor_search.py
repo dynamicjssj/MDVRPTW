@@ -5,6 +5,7 @@ VNS邻域搜索类
 """
 from copy import deepcopy
 from random import sample
+from tools import cal_time
 
 
 class VariableNeighborSearch:
@@ -41,9 +42,15 @@ class VariableNeighborSearch:
                 f2 += self.data_bag.dis_mat[route[i]][route[i - 1]] * self.data_bag.c2
         # 3 制冷成本
         for route in grouped_chromosome:
-            for i in range(1, len(route)):
-                f3 += self.data_bag.dis_mat[route[i]][
-                          route[i - 1]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+            # self.data_bag.v1 需要替换。需要先获取第一个点的时间
+            current_time = self.data_bag.data['ET浮点数'][route[1]]
+            f3 += self.data_bag.dis_mat[route[1]][
+                      route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+            # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
+            for i in range(2, len(route)):
+                dynamic_time = cal_time(current_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                f3 += (dynamic_time - current_time) * self.data_bag.alpha_1 * self.data_bag.c3
+                current_time = dynamic_time
                 f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (
                             self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
                         route[i]]) / self.data_bag.v2
@@ -70,9 +77,9 @@ class VariableNeighborSearch:
                 if i == 1:  # 第一个客户到达时间
                     to_time = self.data_bag.data['ET浮点数'][route[1]]
                 else:
-                    tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
-                    to_time += tij
-                # to_time < self.data_bag.data['EET浮点数'][route[i]] or
+                    # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
+                    to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
                 else:
@@ -101,9 +108,17 @@ class VariableNeighborSearch:
             f2 += self.data_bag.dis_mat[route[i]][route[i - 1]] * self.data_bag.c2
 
         # 3 制冷成本
-        for i in range(1, len(route)):
-            f3 += self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
-            f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][route[i]]) / self.data_bag.v2
+        current_time = self.data_bag.data['ET浮点数'][route[1]]
+        f3 += self.data_bag.dis_mat[route[1]][
+                  route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+        # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
+        for i in range(2, len(route)):
+            dynamic_time = cal_time(current_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+            f3 += (dynamic_time - current_time) * self.data_bag.alpha_1 * self.data_bag.c3
+            current_time = dynamic_time
+            f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (
+                    self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
+                route[i]]) / self.data_bag.v2
 
         # 4 碳排放成本
         fc1, fc2 = 0, f3 / self.data_bag.c3
@@ -125,9 +140,9 @@ class VariableNeighborSearch:
             if i == 1:  # 第一个客户到达时间
                 to_time = self.data_bag.data['ET浮点数'][route[1]]
             else:
-                tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
-                to_time += tij
-            # to_time < self.data_bag.data['EET浮点数'][route[i]] or
+                # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
+                to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+
             if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                 f5 += self.data_bag.M
             else:
@@ -259,11 +274,12 @@ class VariableNeighborSearch:
                 return flag1, flag2
 
             sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][route[i - 1]]) / self.data_bag.v2
-            tij = self.data_bag.dis_mat[route[i - 1]][route[i]] / self.data_bag.v1
+            # tij = self.data_bag.dis_mat[route[i - 1]][route[i]] / self.data_bag.v1
             if i == 1:
                 to_time = (self.data_bag.data['EET浮点数'][route[i]])
             else:
-                to_time += sij + tij
+                to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                to_time += sij
 
             # to_time < self.data_bag.data['EET浮点数'][route[i]] or
             if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
