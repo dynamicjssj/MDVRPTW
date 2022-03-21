@@ -24,17 +24,6 @@ def cal_time(t, dis):  # t表示开始的时间,dis表示两个点之间点距�
             left_dis -= speed * left_time
     return t
 
-
-# 获取用户的等级、暂时先通过index来查看
-def get_user_level(index):
-    if index <= 11:  # 1~12为A,计算机中计数从0开始，所以是0-11
-        return 'A'
-    elif 12 <= index <= 23:  # 13 ~ 24
-        return 'B'
-    else:
-        return 'C'
-
-
 # 根据用户等级获取惩罚系数
 def get_punish_coefficient(level):
     c4 = 0  # 提前到的惩罚成本

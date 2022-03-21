@@ -5,7 +5,7 @@ VNS邻域搜索类
 """
 from copy import deepcopy
 from random import sample
-from tools import cal_time
+from tools import cal_time,get_punish_coefficient
 
 
 class VariableNeighborSearch:
@@ -83,6 +83,7 @@ class VariableNeighborSearch:
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
                 else:
+                    self.data_bag.c4, self.data_bag.c5 = get_punish_coefficient(self.data_bag.data["用户等级"][i])
                     f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
                                                  0) + self.data_bag.c5 * max(
                         to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
@@ -146,6 +147,7 @@ class VariableNeighborSearch:
             if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                 f5 += self.data_bag.M
             else:
+                self.data_bag.c4, self.data_bag.c5 = get_punish_coefficient(self.data_bag.data["用户等级"][i])
                 f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
                                              0) + self.data_bag.c5 * max(
                     to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
