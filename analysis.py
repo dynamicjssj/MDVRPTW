@@ -23,7 +23,7 @@ def analysisCarbonPrice(data):
             data.c6 = i
             ga = GeneticAlgorithm(data)
             grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False)
-            f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome)  # f4是碳价
+            f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome,True)  # f4是碳价
             total_price = f1 + f2 + f3 + f4 + f5  # 总共花费的价格
             fc1, fc2 = 0, f3 / data.c3
             for route in grouped_chromosome:
@@ -70,7 +70,7 @@ def analysisQuotas(data):
                 data.T_q = i
                 ga = GeneticAlgorithm(data)
                 grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False)
-                f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome)  # f4是碳价
+                f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome,True)  # f4是碳价
                 total_price += (f1 + f2 + f3 + f4 + f5)  # 总共花费的价格
                 fc1, fc2 = 0, f3 / data.c3
                 for route in grouped_chromosome:
@@ -131,7 +131,7 @@ def analysisAll(data):
                     data.T_q = j
                     ga = GeneticAlgorithm(data)
                     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False)
-                    f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome)  # f4是碳价
+                    f1, f2, f3, f4, f5, m,ce = ga.cal_fitness(grouped_chromosome,True)  # f4是碳价
                     total_price += (f1 + f2 + f3 + f4 + f5)  # 总共花费的价格
                     pbar.update(1)
                 total_price /= 10

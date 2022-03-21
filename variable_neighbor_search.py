@@ -5,7 +5,7 @@ VNS邻域搜索类
 """
 from copy import deepcopy
 from random import sample
-from tools import cal_time,get_punish_coefficient
+from tools import cal_time,get_punish_coefficient,cal_varying_time
 
 
 class VariableNeighborSearch:
@@ -25,7 +25,7 @@ class VariableNeighborSearch:
         self.y = []
         self.y_best = []
 
-    def cal_fitness_all(self, grouped_chromosome):
+    def cal_fitness_all(self, grouped_chromosome,time_variable):
 
         """
 
@@ -78,7 +78,13 @@ class VariableNeighborSearch:
                     to_time = self.data_bag.data['ET浮点数'][route[1]]
                 else:
                     # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
-                    to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                    # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                    if time_variable:
+                        to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                               self.data_bag.coe_list)
+                    else:
+                        tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
+                        to_time += tij
 
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
@@ -93,7 +99,7 @@ class VariableNeighborSearch:
 
         return f1, f2, f3, f4, f5, self.data_bag.M / (f1 + f2 + f3 + f4 + f5)
 
-    def cal_fitness_single(self, route):
+    def cal_fitness_single(self, route,time_variable):
 
         """
 
@@ -142,7 +148,13 @@ class VariableNeighborSearch:
                 to_time = self.data_bag.data['ET浮点数'][route[1]]
             else:
                 # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
-                to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                if time_variable:
+                    to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                           self.data_bag.coe_list)
+                else:
+                    tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
+                    to_time += tij
 
             if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                 f5 += self.data_bag.M
@@ -159,7 +171,7 @@ class VariableNeighborSearch:
 
         return total_cost
 
-    def insert_operator(self, r_c, g_c):
+    def insert_operator(self, r_c, g_c,time_variable):
         """
 
         :param r_c:
@@ -167,11 +179,11 @@ class VariableNeighborSearch:
         :return:
         """
         for c in r_c:
-            g_c = self.swap_operator(c, g_c)
+            g_c = self.swap_operator(c, g_c,time_variable)
 
         return g_c
 
-    def swap_operator(self, c, g_c):
+    def swap_operator(self, c, g_c,time_variable):
         """
 
         :param c:
@@ -180,12 +192,12 @@ class VariableNeighborSearch:
         """
         res = []  # (i, route, delta)
         for route in g_c:
-            before_fit = self.cal_fitness_single(route)
+            before_fit = self.cal_fitness_single(route,time_variable)
             for i in range(1, len(route)):
                 route.insert(i, c)
-                load_flag, time_flag = self.check_load_and_time(route)
+                load_flag, time_flag = self.check_load_and_time(route,time_variable)
                 if load_flag and time_flag:
-                    after_fit = self.cal_fitness_single(route)
+                    after_fit = self.cal_fitness_single(route,time_variable)
                     route.remove(c)
                     res.append((i, route, after_fit - before_fit))
                 else:
@@ -247,7 +259,7 @@ class VariableNeighborSearch:
         route = [f_w] + route + [l_w]
         return route
 
-    def check_load_and_time(self, route):
+    def check_load_and_time(self, route,time_variable):
         """
 
         :param route:
@@ -280,7 +292,13 @@ class VariableNeighborSearch:
             if i == 1:
                 to_time = (self.data_bag.data['EET浮点数'][route[i]])
             else:
-                to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
+                if time_variable:
+                    to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                               self.data_bag.coe_list)
+                else:
+                    tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
+                    to_time += tij
                 to_time += sij
 
             # to_time < self.data_bag.data['EET浮点数'][route[i]] or
@@ -290,7 +308,7 @@ class VariableNeighborSearch:
 
         return flag1, flag2
 
-    def run_vns(self):
+    def run_vns(self,time_variable):
 
         """
 
@@ -304,10 +322,10 @@ class VariableNeighborSearch:
 
         for it in range(self.MAX_):
             r_c, g_c = self.two_opt_operator(g_c_cur)
-            g_c_new = self.insert_operator(r_c, g_c)
+            g_c_new = self.insert_operator(r_c, g_c,time_variable)
             fit_new = 0
             for route in g_c_new:
-                fit_new += self.cal_fitness_single(route)
+                fit_new += self.cal_fitness_single(route,time_variable)
             self.y.append(fit_new)
             if fit_new < fit_cur:
                 fit_cur = fit_new
