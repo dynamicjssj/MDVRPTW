@@ -24,17 +24,18 @@ def basic_function(event):
     print("*******正在运行基础方法(恒定速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False,False)
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False, False)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
     plot_func(y1, y_best1)
 
+
 def basic_function_v(event):
     print("*******正在运行基础方法(时变速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False,True)
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False, True)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
@@ -45,21 +46,23 @@ def adaptive_function(event):
     print("*******正在运行自适应方法(恒定速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False,True,False)
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, False)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
     plot_func(y1, y_best1)
 
+
 def adaptive_function_v(event):
     print("*******正在运行自适应方法(时变速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False,True,True)
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, True)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
     plot_func(y1, y_best1)
+
 
 def analysis_carbon_price(event):
     exit_home()
@@ -102,6 +105,5 @@ if __name__ == '__main__':
     btn2.grid(row=5, column=1, padx=60, pady=10)
     btn3.grid(row=6, column=1, padx=60, pady=10)
     btn4.grid(row=7, column=1, padx=60, pady=10)
-
 
     win.mainloop()

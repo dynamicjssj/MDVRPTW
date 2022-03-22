@@ -4,12 +4,14 @@
 
 """
 import heapq
+
+from CEME import CEME
 from main_algorithm import *
 from copy import deepcopy
 from random import randint, random, shuffle, sample
 from collections import deque
 from variable_neighbor_search import *
-from tools import cal_time, get_punish_coefficient, cal_varying_time
+from tools import get_punish_coefficient, cal_varying_time, cal_duration
 import numpy as np
 
 
@@ -58,18 +60,18 @@ class GeneticAlgorithm:
                     continue
 
                 self.data_bag.time_space_dis[i][j] = theta1 * (
-                            (self.data_bag.dis_mat[i][j] - min_ds) / (max_ds - min_ds)) + \
+                        (self.data_bag.dis_mat[i][j] - min_ds) / (max_ds - min_ds)) + \
                                                      theta2 * ((time_mat[i][j] - min_dt) / (max_dt - min_dt))
 
-    def init_chrom_by_random(self,time_variable):
+    def init_chrom_by_random(self, time_variable):
         customers = list(range(self.data_bag.m))
         pop = []
         for i in range(self.popsize):
             pop.append(sample(customers, self.data_bag.m))
-        self.in_no_st = self.divide_into_group(pop[0],time_variable)
+        self.in_no_st = self.divide_into_group(pop[0], time_variable)
         return pop
 
-    def cal_fitness(self, grouped_chromosome,time_variable):
+    def cal_fitness(self, grouped_chromosome, time_variable):
         """
         grouped_chromosome: 集群染色体
 
@@ -87,13 +89,29 @@ class GeneticAlgorithm:
         for route in grouped_chromosome:
             # self.data_bag.v1 需要替换。需要先获取第一个点的时间
             current_time = self.data_bag.data['ET浮点数'][route[1]]
-            f3 += self.data_bag.dis_mat[route[1]][
-                      route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+            ceme = CEME()
+            if time_variable:
+                duration, fuel_cost = cal_duration(current_time, self.data_bag.dis_mat[route[1]][
+                    route[0]], self.data_bag.coe_list)
+                f3 += fuel_cost
+            else:
+                # f3 += self.data_bag.dis_mat[route[1]][
+                #       route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+                f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[1]][
+                    route[0]])
             # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
             for i in range(2, len(route)):
-                dynamic_time = cal_time(current_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
-                f3 += (dynamic_time - current_time) * self.data_bag.alpha_1 * self.data_bag.c3
-                current_time = dynamic_time
+                if time_variable:
+                    dynamic_time, fuel_cost = cal_varying_time(current_time,
+                                                               self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                                               self.data_bag.coe_list)
+                    f3 += fuel_cost
+                    current_time = dynamic_time
+                else:
+                    f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[i]][
+                        route[i - 1]])
+                    current_time += self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1
+
                 f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (
                         self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
                     route[i]]) / self.data_bag.v2
@@ -123,7 +141,7 @@ class GeneticAlgorithm:
                     # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
                     # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
                     if time_variable:
-                        to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                        to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
                                                    self.data_bag.coe_list)
                     else:
                         tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
@@ -142,7 +160,7 @@ class GeneticAlgorithm:
 
         return f1, f2, f3, f4, f5, self.data_bag.M / (f1 + f2 + f3 + f4 + f5), carbon_emission
 
-    def divide_into_group(self, chromosome,time_variable):
+    def divide_into_group(self, chromosome, time_variable):
         """
 
         :param chromosome:
@@ -180,7 +198,8 @@ class GeneticAlgorithm:
                     # to_time += tij  # cur_node 到达时间 or to_time < self.data_bag.data['EET浮点数'][cur_node]
                     # to_time = cal_time(to_time, self.data_bag.dis_mat[last_node][cur_node])
                     if time_variable:
-                        to_time = cal_varying_time(to_time, self.data_bag.dis_mat[last_node][cur_node],self.data_bag.coe_list)
+                        to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[last_node][cur_node],
+                                                   self.data_bag.coe_list)
                     else:
                         tij = self.data_bag.dis_mat[last_node][cur_node] / self.data_bag.v1
                         to_time += tij  # cur_node 到达时间 or to_time < self.data_bag.data['EET浮点数'][cur_node]
@@ -244,15 +263,15 @@ class GeneticAlgorithm:
 
         pass
 
-    def get_pop_fitness(self, pop,time_variable):
+    def get_pop_fitness(self, pop, time_variable):
         """
         种群适应度
         """
 
         fitness = []
         for chromosome in pop:
-            grouped_chromosome = self.divide_into_group(chromosome,time_variable)
-            a, b, c, d, e, fitness_cur, carbon_emission = self.cal_fitness(grouped_chromosome,time_variable)
+            grouped_chromosome = self.divide_into_group(chromosome, time_variable)
+            a, b, c, d, e, fitness_cur, carbon_emission = self.cal_fitness(grouped_chromosome, time_variable)
             if fitness_cur > self.fit_max:
                 self.fit_max = fitness_cur
                 self.individual = grouped_chromosome
@@ -388,17 +407,17 @@ class GeneticAlgorithm:
 
         return pop
 
-    def neighbor_search(self, grouped_chromosome,time_variable):
+    def neighbor_search(self, grouped_chromosome, time_variable):
         vns = VariableNeighborSearch(grouped_chromosome, self.data_bag)
         return vns.run_vns(time_variable)
 
     @Timecounter
-    def run(self, flag, adaptive=True, time_variable= True): # time_variable 为True表示使用时变速度
+    def run(self, flag, adaptive=True, time_variable=True):  # time_variable 为True表示使用时变速度
         begin = time()
         pop = self.init_chrom_by_random(time_variable)
         print("计算中......")
         for _ in range(self.max_iterations):
-            fitness = self.get_pop_fitness(pop,time_variable)
+            fitness = self.get_pop_fitness(pop, time_variable)
             self.y.append(self.data_bag.M / (sum(fitness) / self.popsize))
             pop, fitness = self.select(pop, fitness)
             pop = self.mutation(pop, fitness, adaptive)
@@ -410,7 +429,7 @@ class GeneticAlgorithm:
         # print(self.fit_max)
         self.in_st = self.reasonable_sol[-5]
         self.individual1 = self.individual
-        self.individual, y, y_best = self.neighbor_search(self.individual,time_variable)
+        self.individual, y, y_best = self.neighbor_search(self.individual, time_variable)
         print('算法结束')
         if flag:
             print('=======================================================================================')
@@ -420,14 +439,14 @@ class GeneticAlgorithm:
                 print('第{}辆车的路线为'.format(i + 1), self.individual[i])
                 temp = []
                 temp.append(self.individual[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp,time_variable)
+                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
                 print('第{}辆车的派遣成本为：'.format(i + 1), f1)
                 print('第{}辆车的运输成本为：'.format(i + 1), f2)
                 print('第{}辆车的制冷成本为：'.format(i + 1), f3)
                 print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
                 print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
                 print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual,time_variable)
+            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual, time_variable)
             print(self.individual)
             print('总成本为:', f1 + f2 + f3 + f4 + f5)
             print('车辆派遣成本为:', f1)
@@ -459,14 +478,14 @@ class GeneticAlgorithm:
                 print('第{}辆车的路线为'.format(i + 1), self.individual1[i])
                 temp = []
                 temp.append(self.individual1[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp,time_variable)
+                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
                 print('第{}辆车的派遣成本为：'.format(i + 1), f1)
                 print('第{}辆车的运输成本为：'.format(i + 1), f2)
                 print('第{}辆车的制冷成本为：'.format(i + 1), f3)
                 print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
                 print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
                 print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual1,time_variable)
+            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual1, time_variable)
             print('总成本为:', f1 + f2 + f3 + f4 + f5)
             print('车辆派遣成本为:', f1)
             print('车辆运输成本为:', f2)
@@ -482,7 +501,7 @@ class GeneticAlgorithm:
                 print('第{}辆车的路线为'.format(i + 1), self.individual[i])
                 temp = []
                 temp.append(self.individual[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp,time_variable)
+                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
                 print('第{}辆车的派遣成本为：'.format(i + 1), f1)
                 print('第{}辆车的运输成本为：'.format(i + 1), f2)
                 print('第{}辆车的制冷成本为：'.format(i + 1), f3)
@@ -490,7 +509,7 @@ class GeneticAlgorithm:
                 print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
                 print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
 
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual,time_variable)
+            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual, time_variable)
             print('总成本为:', f1 + f2 + f3 + f4 + f5)
             print('车辆派遣成本为:', f1)
             print('车辆运输成本为:', f2)
@@ -506,7 +525,7 @@ class GeneticAlgorithm:
                 print('第{}辆车的路线为'.format(i + 1), self.in_no_st[i])
                 temp = []
                 temp.append(self.in_no_st[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp,time_variable)
+                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
                 print('第{}辆车的派遣成本为：'.format(i + 1), f1)
                 print('第{}辆车的运输成本为：'.format(i + 1), f2)
                 print('第{}辆车的制冷成本为：'.format(i + 1), f3)
@@ -514,7 +533,7 @@ class GeneticAlgorithm:
                 print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
                 print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
 
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_no_st,time_variable)
+            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_no_st, time_variable)
             print('总成本为:', f1 + f2 + f3 + f4 + f5)
             print('车辆派遣成本为:', f1)
             print('车辆运输成本为:', f2)
@@ -530,14 +549,14 @@ class GeneticAlgorithm:
                 print('第{}辆车的路线为'.format(i + 1), self.in_st[i])
                 temp = []
                 temp.append(self.in_st[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp,time_variable)
+                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
                 print('第{}辆车的派遣成本为：'.format(i + 1), f1)
                 print('第{}辆车的运输成本为：'.format(i + 1), f2)
                 print('第{}辆车的制冷成本为：'.format(i + 1), f3)
                 print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
                 print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
                 print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_st,time_variable)
+            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_st, time_variable)
             print('总成本为:', f1 + f2 + f3 + f4 + f5)
             print('车辆派遣成本为:', f1)
             print('车辆运输成本为:', f2)

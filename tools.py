@@ -1,3 +1,5 @@
+from CEME import CEME
+
 max_v = 50  # 拥堵时的最大速度
 min_v = 20  # 拥堵时的最小速度
 from Coefficient import get_coefficient_list
@@ -72,6 +74,8 @@ def down_round(t):
 
 # 获取时变速度下需要的时间
 def cal_varying_time(t, dis, coe_list):
+    ceme = CEME()
+    f3 = 0
     driving_distance = 0
     left_dis = dis  # 标注剩余的距离
     while driving_distance < dis:
@@ -80,10 +84,12 @@ def cal_varying_time(t, dis, coe_list):
         driving_distance += left_time * speed  # 已经行驶的距离
         if driving_distance >= dis:
             t += left_dis / speed
+            f3 += ceme.get_fuel_cost(speed, left_dis)
         else:
             t = my_round(t)  # 时间到达下一个时间段
             left_dis -= speed * left_time
-    return t
+            f3 += ceme.get_fuel_cost(speed, left_time * speed)
+    return t, f3
 
 
 def cal_time(t, dis):  # t表示开始的时间,dis表示两个点之间点距离 返回值是到达的时间
@@ -107,6 +113,8 @@ def cal_time(t, dis):  # t表示开始的时间,dis表示两个点之间点距�
 def cal_duration(end_time, dis, coe_list):
     left_time = None
     speed = None
+    ceme = CEME()
+    f3 = 0
     driving_distance = 0
     left_dis = dis  # 标注剩余的距离
     start_time = end_time
@@ -116,10 +124,12 @@ def cal_duration(end_time, dis, coe_list):
         driving_distance += left_time * speed  # 已经行驶的距离
         if driving_distance >= dis:
             start_time -= left_dis / speed
+            f3 += ceme.get_fuel_cost(speed, left_dis)
         else:
             start_time = down_round(start_time)  # 时间到达下一个时间段
             left_dis -= speed * left_time
-    return end_time - start_time
+            f3 += ceme.get_fuel_cost(speed, left_time * speed)
+    return end_time - start_time, f3
 
 
 # 根据用户等级获取惩罚系数
@@ -137,9 +147,7 @@ def get_punish_coefficient(level):
         c5 = 20
     return c4, c5
 
-
 # if __name__ == '__main__':
 #     coe_list = get_coefficient_list()
 #     t = cal_duration(10,20,coe_list)
 #     print(t)
-

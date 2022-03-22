@@ -25,9 +25,11 @@ def Timecounter(func):
     :param func:
     :return:
     """
+
     def wrapper(*args, **kwargs):
         start = time()
         result = func(*args, **kwargs)
         print(f'算法总耗时{time() - start}秒', func.__name__)
         return result
+
     return wrapper

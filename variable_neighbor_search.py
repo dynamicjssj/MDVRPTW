@@ -5,7 +5,9 @@ VNS邻域搜索类
 """
 from copy import deepcopy
 from random import sample
-from tools import cal_time,get_punish_coefficient,cal_varying_time
+
+from CEME import CEME
+from tools import cal_time, get_punish_coefficient, cal_varying_time, cal_duration
 
 
 class VariableNeighborSearch:
@@ -25,7 +27,7 @@ class VariableNeighborSearch:
         self.y = []
         self.y_best = []
 
-    def cal_fitness_all(self, grouped_chromosome,time_variable):
+    def cal_fitness_all(self, grouped_chromosome, time_variable):
 
         """
 
@@ -52,8 +54,8 @@ class VariableNeighborSearch:
                 f3 += (dynamic_time - current_time) * self.data_bag.alpha_1 * self.data_bag.c3
                 current_time = dynamic_time
                 f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (
-                            self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
-                        route[i]]) / self.data_bag.v2
+                        self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
+                    route[i]]) / self.data_bag.v2
         # 4 碳排放成本
         fc1, fc2 = 0, f3 / self.data_bag.c3
         for route in grouped_chromosome:
@@ -67,7 +69,7 @@ class VariableNeighborSearch:
                 fc1 += dij * (self.data_bag.p_0 + qij * (self.data_bag.p_star - self.data_bag.p_0) / self.data_bag.Q)
 
         f4 += self.data_bag.c6 * (
-                    self.data_bag.NVC * self.data_bag.CC * self.data_bag.OF * 44 / 12 * (fc1 + fc2) - self.data_bag.T_q)
+                self.data_bag.NVC * self.data_bag.CC * self.data_bag.OF * 44 / 12 * (fc1 + fc2) - self.data_bag.T_q)
 
         # 5 时间窗惩罚成本
         for route in grouped_chromosome:
@@ -80,10 +82,10 @@ class VariableNeighborSearch:
                     # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
                     # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
                     if time_variable:
-                        to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
-                                               self.data_bag.coe_list)
+                        to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                                   self.data_bag.coe_list)
                     else:
-                        tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
+                        tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
                         to_time += tij
 
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
@@ -99,7 +101,7 @@ class VariableNeighborSearch:
 
         return f1, f2, f3, f4, f5, self.data_bag.M / (f1 + f2 + f3 + f4 + f5)
 
-    def cal_fitness_single(self, route,time_variable):
+    def cal_fitness_single(self, route, time_variable):
 
         """
 
@@ -116,13 +118,29 @@ class VariableNeighborSearch:
 
         # 3 制冷成本
         current_time = self.data_bag.data['ET浮点数'][route[1]]
-        f3 += self.data_bag.dis_mat[route[1]][
-                  route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+        ceme = CEME()
+        if time_variable:
+            duration, fuel_cost = cal_duration(current_time, self.data_bag.dis_mat[route[1]][
+                route[0]], self.data_bag.coe_list)
+            f3 += fuel_cost
+        else:
+            # f3 += self.data_bag.dis_mat[route[1]][
+            #           route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
+            f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[1]][
+                route[0]])
         # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
         for i in range(2, len(route)):
-            dynamic_time = cal_time(current_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
-            f3 += (dynamic_time - current_time) * self.data_bag.alpha_1 * self.data_bag.c3
-            current_time = dynamic_time
+            if time_variable:
+                dynamic_time, fuel_cost = cal_varying_time(current_time,
+                                                           self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                                           self.data_bag.coe_list)
+                f3 += fuel_cost
+                current_time = dynamic_time
+            else:
+                f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[i]][
+                    route[i - 1]])
+                current_time += self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1
+
             f3 += self.data_bag.alpha_2 * self.data_bag.c3 * (
                     self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
                 route[i]]) / self.data_bag.v2
@@ -138,7 +156,8 @@ class VariableNeighborSearch:
                 route[i - 1]]
             fc1 += dij * (self.data_bag.p_0 + qij * (self.data_bag.p_star - self.data_bag.p_0) / self.data_bag.Q)
 
-        f4 += self.data_bag.c6 * (self.data_bag.NVC * self.data_bag.CC * self.data_bag.OF * 44 / 12 * (fc1 + fc2) - self.data_bag.T_q)
+        f4 += self.data_bag.c6 * (
+                    self.data_bag.NVC * self.data_bag.CC * self.data_bag.OF * 44 / 12 * (fc1 + fc2) - self.data_bag.T_q)
 
         # 5 时间窗惩罚成本
         # 出发时间
@@ -150,8 +169,8 @@ class VariableNeighborSearch:
                 # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
                 # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
                 if time_variable:
-                    to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
-                                           self.data_bag.coe_list)
+                    to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                               self.data_bag.coe_list)
                 else:
                     tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
                     to_time += tij
@@ -171,7 +190,7 @@ class VariableNeighborSearch:
 
         return total_cost
 
-    def insert_operator(self, r_c, g_c,time_variable):
+    def insert_operator(self, r_c, g_c, time_variable):
         """
 
         :param r_c:
@@ -179,11 +198,11 @@ class VariableNeighborSearch:
         :return:
         """
         for c in r_c:
-            g_c = self.swap_operator(c, g_c,time_variable)
+            g_c = self.swap_operator(c, g_c, time_variable)
 
         return g_c
 
-    def swap_operator(self, c, g_c,time_variable):
+    def swap_operator(self, c, g_c, time_variable):
         """
 
         :param c:
@@ -192,18 +211,18 @@ class VariableNeighborSearch:
         """
         res = []  # (i, route, delta)
         for route in g_c:
-            before_fit = self.cal_fitness_single(route,time_variable)
+            before_fit = self.cal_fitness_single(route, time_variable)
             for i in range(1, len(route)):
                 route.insert(i, c)
-                load_flag, time_flag = self.check_load_and_time(route,time_variable)
+                load_flag, time_flag = self.check_load_and_time(route, time_variable)
                 if load_flag and time_flag:
-                    after_fit = self.cal_fitness_single(route,time_variable)
+                    after_fit = self.cal_fitness_single(route, time_variable)
                     route.remove(c)
                     res.append((i, route, after_fit - before_fit))
                 else:
                     route.remove(c)
 
-        if not res:   # 未insert
+        if not res:  # 未insert
             g_c.append(self.add_ware([c]))
             return g_c
 
@@ -232,7 +251,7 @@ class VariableNeighborSearch:
                     route.remove(c)
                     break
 
-        g_c = [route for route in g_c if len(route) > 2]   # 去掉只有ware的
+        g_c = [route for route in g_c if len(route) > 2]  # 去掉只有ware的
 
         return r_c, g_c
 
@@ -259,7 +278,7 @@ class VariableNeighborSearch:
         route = [f_w] + route + [l_w]
         return route
 
-    def check_load_and_time(self, route,time_variable):
+    def check_load_and_time(self, route, time_variable):
         """
 
         :param route:
@@ -287,14 +306,15 @@ class VariableNeighborSearch:
                 flag1 = False
                 return flag1, flag2
 
-            sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][route[i - 1]]) / self.data_bag.v2
+            sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][
+                route[i - 1]]) / self.data_bag.v2
             # tij = self.data_bag.dis_mat[route[i - 1]][route[i]] / self.data_bag.v1
             if i == 1:
                 to_time = (self.data_bag.data['EET浮点数'][route[i]])
             else:
                 # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
                 if time_variable:
-                    to_time = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                    to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
                                                self.data_bag.coe_list)
                 else:
                     tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
@@ -308,7 +328,7 @@ class VariableNeighborSearch:
 
         return flag1, flag2
 
-    def run_vns(self,time_variable):
+    def run_vns(self, time_variable):
 
         """
 
@@ -322,10 +342,10 @@ class VariableNeighborSearch:
 
         for it in range(self.MAX_):
             r_c, g_c = self.two_opt_operator(g_c_cur)
-            g_c_new = self.insert_operator(r_c, g_c,time_variable)
+            g_c_new = self.insert_operator(r_c, g_c, time_variable)
             fit_new = 0
             for route in g_c_new:
-                fit_new += self.cal_fitness_single(route,time_variable)
+                fit_new += self.cal_fitness_single(route, time_variable)
             self.y.append(fit_new)
             if fit_new < fit_cur:
                 fit_cur = fit_new
@@ -338,10 +358,3 @@ class VariableNeighborSearch:
                     g_c_best = g_c_new
 
         return g_c_best, self.y, self.y_best
-
-
-
-
-
-
-
