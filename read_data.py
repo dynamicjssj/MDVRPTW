@@ -40,11 +40,11 @@ class ReadData:
         # self.cong_mat = defaultdict(dict)
         self.time_space_dis = defaultdict(dict)
         self.warehouse_list = ['A', 'B', 'C']
-        self.warehouse_A = (3.55, 12.8)
-        self.warehouse_B = (7.56, 4.53)
-        self.warehouse_C = (14.14, 15.20)
+        self.warehouse_A = (7.1, 25.6)
+        self.warehouse_B = (15.12, 9.06)
+        self.warehouse_C = (28.28, 30.4)
         self.w_list = [self.warehouse_A, self.warehouse_B, self.warehouse_C]
-        self.warehouse_time = (6.50, 20.50)
+        self.warehouse_time = (3.5, 20.50)
 
     def distance_matrix(self):
         df = pd.read_excel('数据.xlsx')
@@ -156,29 +156,29 @@ class ReadData:
 
         self.data['交付需求/t']['A'] = 0
         self.data['取件需求/t']['A'] = 0
-        self.data['x']['A'] = 3.55
-        self.data['y']['A'] = 12.8
-        self.data['ET浮点数']['A'] = 6.50
+        self.data['x']['A'] = 7.1
+        self.data['y']['A'] = 25.6
+        self.data['ET浮点数']['A'] = 3.50
         self.data['LT浮点数']['A'] = 20.50
-        self.data['EET浮点数']['A'] = 6.50
+        self.data['EET浮点数']['A'] = 3.5
         self.data['LLT浮点数']['A'] = 20.50
 
         self.data['交付需求/t']['B'] = 0
         self.data['取件需求/t']['B'] = 0
-        self.data['x']['B'] = 7.56
-        self.data['y']['B'] = 4.53
-        self.data['ET浮点数']['B'] = 6.50
+        self.data['x']['B'] = 15.12
+        self.data['y']['B'] = 9.06
+        self.data['ET浮点数']['B'] = 3.5
         self.data['LT浮点数']['B'] = 20.50
-        self.data['EET浮点数']['B'] = 6.50
+        self.data['EET浮点数']['B'] = 3.5
         self.data['LLT浮点数']['B'] = 20.50
 
         self.data['交付需求/t']['C'] = 0
         self.data['取件需求/t']['C'] = 0
-        self.data['x']['C'] = 14.14
-        self.data['y']['C'] = 15.20
-        self.data['ET浮点数']['C'] = 6.50
+        self.data['x']['C'] = 28.28
+        self.data['y']['C'] = 30.4
+        self.data['ET浮点数']['C'] = 3.5
         self.data['LT浮点数']['C'] = 20.50
-        self.data['EET浮点数']['C'] = 6.50
+        self.data['EET浮点数']['C'] = 3.5
         self.data['LLT浮点数']['C'] = 20.50
         self.coe_list = get_coefficient_list()  # 根据预测的拥堵 系数获得拥堵 系数列表
 

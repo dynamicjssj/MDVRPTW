@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
+from matplotlib.font_manager import FontProperties
 
 def scatter_func(data, grouped_chromosome):
     """
@@ -39,13 +40,25 @@ def scatter_func(data, grouped_chromosome):
 
     fig, ax = plt.subplots()
     # ax = plt.axes()
-    ax.scatter(x_receive + x_send, y_receive + y_send, color='red', marker='o', s=50)
-    ax.scatter(x_ware, y_ware, color='blue', marker='s', s=50)
+    ax.scatter(x_receive + x_send, y_receive + y_send, color='red', marker='o', s=18, label=u'客户点')
+    ax.scatter(x_ware, y_ware, color='blue', marker='s',  s=30, label=u'配送中心')
+
+    ax.set_xlim([0, 40])
+    ax.set_ylim([0, 40])
+    ax.set_xlabel('X/KM')
+    ax.set_ylabel('Y/KM')
+
+    for i in data.warehouse_list:
+        # plt.text((data.data['x'][i], data.data['y'][i]),i,size=5)
+        ax.annotate(i, (data.data['x'][i] + 0.3, data.data['y'][i] + 0.3), fontsize=10, ha='center')
 
     for i in range(data.m):
-        ax.annotate(i, (data.data['x'][i], data.data['y'][i]))    # ,
+        ax.annotate(i+1, (data.data['x'][i]+0.3, data.data['y'][i]+0.3), fontsize=9, ha='center')  # ,
 
-    plt.legend(['customers', 'warehouse'], fontsize=7, loc='upper right', markerscale=0.5)
+    font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=10)
+    plt.legend(prop=font, fontsize=8, loc='upper right', markerscale=0.6)
+
+    #plt.legend(['customers', 'warehouse'], fontsize=7, loc='upper right', markerscale=0.5)
 
     cmap = plt.cm.jet
     cNorm = colors.Normalize(vmin=0, vmax=len(grouped_chromosome))
@@ -123,6 +136,7 @@ def plot_func(y, y_best):
         color='black',
         lw=2,  # 线宽
         ls='-',  # 线条类型
+        label=u'平均值',
     )
 
     plt.plot(
@@ -131,11 +145,23 @@ def plot_func(y, y_best):
         color='red',
         lw=2,  # 线宽
         ls='-',  # 线条类型
+        label=u'最优值',
     )
 
-    plt.legend(['pop average value', 'pop best value'], fontsize=40, loc='upper right', markerscale=1.0)
-    plt.xticks(size=40)
-    plt.yticks(size=40)
+    plt.xticks(size=25)
+    plt.yticks(size=25)
+    # plt.rcParams['font_set.sans-serif'] = ['Microsoft YaHei']
+    font_set = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=30)
+    plt.xlabel(u'迭代次数', fontproperties=font_set, fontsize=30)
+    plt.ylabel(u'目标函数值', fontproperties=font_set, fontsize=30)
+    plt.legend(prop=font_set, fontsize=20, loc='upper right', markerscale=0.6, numpoints=5)
+
+
+   # plt.legend(['pop average value', 'pop best value'], fontsize=40, loc='upper right', markerscale=1.0)
+
+    #plt.xticks(size=40)
+    #plt.yticks(size=40)
+
     plt.show()
 
     pass
