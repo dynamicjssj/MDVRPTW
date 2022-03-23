@@ -49,8 +49,8 @@ def adaptive_function(event):
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, True, False) # 把这里的第一个参数换成True就能打印输出
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
-    scatter_func(data, in_1)
-    plot_func(y1, y_best1)
+    # scatter_func(data, in_1)
+    # plot_func(y1, y_best1)
 
 
 def adaptive_function_v(event):
@@ -60,8 +60,8 @@ def adaptive_function_v(event):
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, True)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
-    scatter_func(data, in_1)
-    plot_func(y1, y_best1)
+    # scatter_func(data, in_1)
+    # plot_func(y1, y_best1)
 
 
 def analysis_carbon_price(event):
