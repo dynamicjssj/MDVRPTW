@@ -19,7 +19,7 @@ class ReadData:
         self.p_star = 0.377  # 车辆k满载时的单位距离油耗	L/km
         self.alpha_1 = 2  # 制冷设备在运输过程中单位时间的燃料消耗量	L/h
         self.alpha_2 = 2.5  # 制冷设备卸货时单位时间燃料消耗量	L/h
-        self.Q = 300  # 配送车辆ｋ的最大载重量	t
+        self.Q = 1100  # 配送车辆ｋ的最大载重量	t
 
         self.c1 = 150  # 每辆车的派遣成本	RMB/car
         self.c2 = 5  # 单位距离运输成本	RMB/km
