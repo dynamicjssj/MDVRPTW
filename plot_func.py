@@ -40,8 +40,8 @@ def scatter_func(data, grouped_chromosome):
 
     fig, ax = plt.subplots()
     # ax = plt.axes()
-    ax.scatter(x_receive + x_send, y_receive + y_send, color='red', marker='o', s=18, label=u'客户点')
-    ax.scatter(x_ware, y_ware, color='blue', marker='s',  s=30, label=u'配送中心')
+    ax.scatter(x_receive + x_send, y_receive + y_send, color='black', marker='o', s=18, label=u'客户点')
+    ax.scatter(x_ware, y_ware, color='red', marker='s', s=30, label=u'配送中心')
 
     ax.set_xlim([0, 40])
     ax.set_ylim([0, 40])
@@ -50,10 +50,10 @@ def scatter_func(data, grouped_chromosome):
 
     for i in data.warehouse_list:
         # plt.text((data.data['x'][i], data.data['y'][i]),i,size=5)
-        ax.annotate(i, (data.data['x'][i] + 0.3, data.data['y'][i] + 0.3), fontsize=10, ha='center')
+        ax.annotate(i, (data.data['x'][i] + 0.6, data.data['y'][i] + 0.7), fontsize=10, ha='center')
 
     for i in range(data.m):
-        ax.annotate(i+1, (data.data['x'][i]+0.3, data.data['y'][i]+0.3), fontsize=9, ha='center')  # ,
+        ax.annotate(i+1, (data.data['x'][i]+0.6, data.data['y'][i]+0.6), fontsize=9, ha='center')  # ,
 
     font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=10)
     plt.legend(prop=font, fontsize=8, loc='upper right', markerscale=0.6)

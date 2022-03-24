@@ -14,7 +14,7 @@ class ReadData:
         self.m = 36  # 客户数量
         self.n = 3  # 仓库数量
         self.v1 = 50  # 车辆k行驶的平均速km/h
-        self.v2 = 120  # 装卸料速度	t/h
+        self.v2 = 240  # 装卸料速度	t/h
         self.p_0 = 0.165  # 车辆k空载时的单位距离油耗	L/km
         self.p_star = 0.377  # 车辆k满载时的单位距离油耗	L/km
         self.alpha_1 = 2  # 制冷设备在运输过程中单位时间的燃料消耗量	L/h
@@ -29,7 +29,7 @@ class ReadData:
         self.c6 = 0.25  # 碳价	RMB/kg
         self.c7 = 1
 
-        self.T_q = 30  # 碳排放配额	kg
+        self.T_q = 100  # 碳排放配额	kg
         self.NVC = 43.3  # 燃料的平均低位发热量	GJ/t
         self.CC = 0.0202  # 燃料的单位热值含碳量	tC/GJ
         self.OF = 0.98  # 燃料的碳氧化率	%
