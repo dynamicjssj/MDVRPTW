@@ -89,16 +89,21 @@ class GeneticAlgorithm:
         for route in grouped_chromosome:
             # self.data_bag.v1 需要替换。需要先获取第一个点的时间
             current_time = self.data_bag.data['ET浮点数'][route[1]]
+            total_time = 0 # 用于记录路径上花费的总时间
+            start_time = self.data_bag.data['ET浮点数'][route[1]] # 用于记录开始时间
+            end_time = 0 # 记录路径的结束时间
             ceme = CEME()
             if time_variable:
                 duration, fuel_cost = cal_duration(current_time, self.data_bag.dis_mat[route[1]][
                     route[0]], self.data_bag.coe_list)
+                start_time -= duration
                 f3 += fuel_cost
             else:
                 # f3 += self.data_bag.dis_mat[route[1]][
                 #       route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
                 f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[1]][
                     route[0]])
+                start_time -= self.data_bag.dis_mat[route[1]][route[0]] / self.data_bag.v1
             # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
             for i in range(2, len(route)):
                 if time_variable:
@@ -141,8 +146,8 @@ class GeneticAlgorithm:
                     # tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1   # 行驶时间
                     # to_time = cal_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]])
                     if time_variable:
-                        to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
-                                                   self.data_bag.coe_list)
+                        to_time, _ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                                      self.data_bag.coe_list)
                     else:
                         tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
                         to_time += tij
@@ -198,8 +203,8 @@ class GeneticAlgorithm:
                     # to_time += tij  # cur_node 到达时间 or to_time < self.data_bag.data['EET浮点数'][cur_node]
                     # to_time = cal_time(to_time, self.data_bag.dis_mat[last_node][cur_node])
                     if time_variable:
-                        to_time,_ = cal_varying_time(to_time, self.data_bag.dis_mat[last_node][cur_node],
-                                                   self.data_bag.coe_list)
+                        to_time, _ = cal_varying_time(to_time, self.data_bag.dis_mat[last_node][cur_node],
+                                                      self.data_bag.coe_list)
                     else:
                         tij = self.data_bag.dis_mat[last_node][cur_node] / self.data_bag.v1
                         to_time += tij  # cur_node 到达时间 or to_time < self.data_bag.data['EET浮点数'][cur_node]
@@ -455,6 +460,7 @@ class GeneticAlgorithm:
             print('碳排放量为:', carbon_emission)
             print('碳排放成本为:', f4)
             print('时间窗惩罚成本为:', f5)
+            print('总运输距离为:', f2 / self.data_bag.c2)
             print(f'联合取送一体化情境下,算法总耗时:{time() - begin}秒')
 
             # print('=======================================================================================')
@@ -493,6 +499,7 @@ class GeneticAlgorithm:
             print('碳排放量为:', carbon_emission)
             print('碳排放成本为:', f4)
             print('时间窗惩罚成本为:', f5)
+            print('总运输距离为:', f2 / self.data_bag.c2)
 
             print('=======================================================================================')
             print('改进遗传算法联合取送一体化情境下: ============================')
@@ -517,6 +524,7 @@ class GeneticAlgorithm:
             print('碳排放量为:', carbon_emission)
             print('碳排放成本为:', f4)
             print('时间窗惩罚成本为:', f5)
+            print('总运输距离为:', f2 / self.data_bag.c2)
 
             print('=======================================================================================')
             print('不考虑时空聚类初始解如下: ============================')
@@ -541,6 +549,7 @@ class GeneticAlgorithm:
             print('碳排放量为：', carbon_emission)
             print('碳排放成本为:', f4)
             print('时间窗惩罚成本为:', f5)
+            print('总运输距离为:', f2 / self.data_bag.c2)
 
             print('=======================================================================================')
             print('考虑时空聚类初始解如下: ============================')
@@ -564,6 +573,7 @@ class GeneticAlgorithm:
             print('碳排放量为:', carbon_emission)
             print('碳排放成本为:', f4)
             print('时间窗惩罚成本为:', f5)
+            print('总运输距离为:', f2 / self.data_bag.c2)
 
             print('=======================================================================================')
             print('画图中，请稍等...')

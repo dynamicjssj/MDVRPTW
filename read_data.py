@@ -13,7 +13,7 @@ class ReadData:
         self.coe_list = None
         self.m = 36  # 客户数量
         self.n = 3  # 仓库数量
-        self.v1 = 50  # 车辆k行驶的平均速km/h
+        self.v1 = 35  # 车辆k行驶的平均速km/h
         self.v2 = 240  # 装卸料速度	t/h
         self.p_0 = 0.165  # 车辆k空载时的单位距离油耗	L/km
         self.p_star = 0.377  # 车辆k满载时的单位距离油耗	L/km
@@ -21,7 +21,7 @@ class ReadData:
         self.alpha_2 = 2.5  # 制冷设备卸货时单位时间燃料消耗量	L/h
         self.Q = 1100  # 配送车辆ｋ的最大载重量	t
 
-        self.c1 = 150  # 每辆车的派遣成本	RMB/car
+        self.c1 = 200  # 每辆车的派遣成本	RMB/car
         self.c2 = 5  # 单位距离运输成本	RMB/km
         self.c3 = 6.68  # 单位燃油价格	RMB/L
         self.c4 = 30  # 提前到达的车辆的单位时间等待成本	RMB/h
@@ -29,7 +29,7 @@ class ReadData:
         self.c6 = 0.25  # 碳价	RMB/kg
         self.c7 = 1
 
-        self.T_q = 100  # 碳排放配额	kg
+        self.T_q = 50  # 碳排放配额	kg
         self.NVC = 43.3  # 燃料的平均低位发热量	GJ/t
         self.CC = 0.0202  # 燃料的单位热值含碳量	tC/GJ
         self.OF = 0.98  # 燃料的碳氧化率	%
@@ -119,7 +119,7 @@ class ReadData:
         return time_mat
 
     def space_time_matrix(self):
-        theta1, theta2 = 0.5, 0.5
+        theta1, theta2 = 0.6, 0.4
         self.distance_matrix()
         time_mat = self.time_matrix()
         min_dt, min_ds = float('inf'), float('inf')

@@ -9,6 +9,7 @@ from plot_func import *
 import tkinter
 from visual import center_window, test
 from analysis import analysisAll, analysisQuotas, analysisCarbonPrice
+from tools import clip
 
 win = None
 d = ReadData()
@@ -25,6 +26,8 @@ def basic_function(event):
     exit_home()
     ga = GeneticAlgorithm(data)
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False, False)
+    clip(y)
+    clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
@@ -36,6 +39,8 @@ def basic_function_v(event):
     exit_home()
     ga = GeneticAlgorithm(data)
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, False, True)
+    clip(y)
+    clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     scatter_func(data, in_1)
@@ -47,6 +52,8 @@ def adaptive_function(event):
     exit_home()
     ga = GeneticAlgorithm(data)
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, False) # 把这里的第一个参数换成True就能打印输出
+    clip(y)
+    clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     # scatter_func(data, in_1)
@@ -58,6 +65,8 @@ def adaptive_function_v(event):
     exit_home()
     ga = GeneticAlgorithm(data)
     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, True)
+    clip(y)
+    clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
     # scatter_func(data, in_1)

@@ -137,15 +137,21 @@ def get_punish_coefficient(level):
     c4 = 0  # 提前到的惩罚成本
     c5 = 0  # 迟到的惩罚成本
     if level == 'A':
-        c4 = 30
-        c5 = 40
+        c4 = 50
+        c5 = 50
     elif level == 'B':
-        c4 = 20
-        c5 = 30
+        c4 = 40
+        c5 = 40
     else:
-        c4 = 10
-        c5 = 20
+        c4 = 30
+        c5 = 30
     return c4, c5
+
+# 用来裁剪有问题的数据
+def clip(y):
+    for i in range(len(y)):
+        if y[i] > 10000:
+            y[i] -= 1000000
 
 # if __name__ == '__main__':
 #     coe_list = get_coefficient_list()
