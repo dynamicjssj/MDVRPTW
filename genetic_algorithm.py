@@ -13,6 +13,7 @@ from collections import deque
 from variable_neighbor_search import *
 from tools import get_punish_coefficient, cal_varying_time, cal_duration
 import numpy as np
+from print_func import print_message
 
 
 class GeneticAlgorithm:
@@ -89,21 +90,16 @@ class GeneticAlgorithm:
         for route in grouped_chromosome:
             # self.data_bag.v1 需要替换。需要先获取第一个点的时间
             current_time = self.data_bag.data['ET浮点数'][route[1]]
-            total_time = 0 # 用于记录路径上花费的总时间
-            start_time = self.data_bag.data['ET浮点数'][route[1]] # 用于记录开始时间
-            end_time = 0 # 记录路径的结束时间
             ceme = CEME()
             if time_variable:
                 duration, fuel_cost = cal_duration(current_time, self.data_bag.dis_mat[route[1]][
                     route[0]], self.data_bag.coe_list)
-                start_time -= duration
                 f3 += fuel_cost
             else:
                 # f3 += self.data_bag.dis_mat[route[1]][
                 #       route[0]] / self.data_bag.v1 * self.data_bag.alpha_1 * self.data_bag.c3
                 f3 += ceme.get_fuel_cost(self.data_bag.v1, self.data_bag.dis_mat[route[1]][
                     route[0]])
-                start_time -= self.data_bag.dis_mat[route[1]][route[0]] / self.data_bag.v1
             # 上面的公式用于计算仓库到第一个客户，这个时间速度是恒定的50
             for i in range(2, len(route)):
                 if time_variable:
@@ -429,151 +425,20 @@ class GeneticAlgorithm:
             pop = self.cross(pop, fitness, adaptive)
             shuffle(pop)
             # print(self.data_bag.M / self.fit_max)
-            # break
-        # print(self.divide_into_group(self.individual))
-        # print(self.fit_max)
         self.in_st = self.reasonable_sol[-5]
         self.individual1 = self.individual
         self.individual, y, y_best = self.neighbor_search(self.individual, time_variable)
         print('算法结束')
         if flag:
-            print('=======================================================================================')
-            print('联合取送一体化情境下: ============================')
-            print('共需要{}辆车'.format(len(self.individual)))
-            for i in range(len(self.individual)):
-                print('第{}辆车的路线为'.format(i + 1), self.individual[i])
-                temp = []
-                temp.append(self.individual[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
-                print('第{}辆车的派遣成本为：'.format(i + 1), f1)
-                print('第{}辆车的运输成本为：'.format(i + 1), f2)
-                print('第{}辆车的制冷成本为：'.format(i + 1), f3)
-                print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
-                print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
-                print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual, time_variable)
-            print(self.individual)
-            print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            print('车辆派遣成本为:', f1)
-            print('车辆运输成本为:', f2)
-            print('制冷成本为:', f3)
-            print('碳排放量为:', carbon_emission)
-            print('碳排放成本为:', f4)
-            print('时间窗惩罚成本为:', f5)
-            print('总运输距离为:', f2 / self.data_bag.c2)
-            print(f'联合取送一体化情境下,算法总耗时:{time() - begin}秒')
-
-            # print('=======================================================================================')
-            # print('每个仓库单独取送一体化情境下: ============================')
-            # print('共需要{}辆车'.format(len(self.individual)))
-            # for i in range(len(self.individual)):
-            #     print('第{}辆车的路线为'.format(i + 1), self.individual[i])
-            #
-            # f1, f2, f3, f4, f5, _ = self.cal_fitness(self.individual)
-            # print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            # print('车辆派遣成本为:', f1)
-            # print('车辆运输成本为:', f2)
-            # print('制冷成本为:', f3)
-            # print('碳排放成本为:', f4)
-            # print('时间窗惩罚成本为:', f5)
-
-            print('=======================================================================================')
-            print('普通遗传算法联合取送一体化情境下: ============================')
-            print('共需要{}辆车'.format(len(self.individual1)))
-            for i in range(len(self.individual1)):
-                print('第{}辆车的路线为'.format(i + 1), self.individual1[i])
-                temp = []
-                temp.append(self.individual1[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
-                print('第{}辆车的派遣成本为：'.format(i + 1), f1)
-                print('第{}辆车的运输成本为：'.format(i + 1), f2)
-                print('第{}辆车的制冷成本为：'.format(i + 1), f3)
-                print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
-                print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
-                print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual1, time_variable)
-            print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            print('车辆派遣成本为:', f1)
-            print('车辆运输成本为:', f2)
-            print('制冷成本为:', f3)
-            print('碳排放量为:', carbon_emission)
-            print('碳排放成本为:', f4)
-            print('时间窗惩罚成本为:', f5)
-            print('总运输距离为:', f2 / self.data_bag.c2)
-
-            print('=======================================================================================')
-            print('改进遗传算法联合取送一体化情境下: ============================')
-            print('共需要{}辆车'.format(len(self.individual)))
-            for i in range(len(self.individual)):
-                print('第{}辆车的路线为'.format(i + 1), self.individual[i])
-                temp = []
-                temp.append(self.individual[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
-                print('第{}辆车的派遣成本为：'.format(i + 1), f1)
-                print('第{}辆车的运输成本为：'.format(i + 1), f2)
-                print('第{}辆车的制冷成本为：'.format(i + 1), f3)
-                print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
-                print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
-                print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.individual, time_variable)
-            print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            print('车辆派遣成本为:', f1)
-            print('车辆运输成本为:', f2)
-            print('制冷成本为:', f3)
-            print('碳排放量为:', carbon_emission)
-            print('碳排放成本为:', f4)
-            print('时间窗惩罚成本为:', f5)
-            print('总运输距离为:', f2 / self.data_bag.c2)
-
-            print('=======================================================================================')
-            print('不考虑时空聚类初始解如下: ============================')
-            print('共需要{}辆车'.format(len(self.in_no_st)))
-            for i in range(len(self.in_no_st)):
-                print('第{}辆车的路线为'.format(i + 1), self.in_no_st[i])
-                temp = []
-                temp.append(self.in_no_st[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
-                print('第{}辆车的派遣成本为：'.format(i + 1), f1)
-                print('第{}辆车的运输成本为：'.format(i + 1), f2)
-                print('第{}辆车的制冷成本为：'.format(i + 1), f3)
-                print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
-                print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
-                print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_no_st, time_variable)
-            print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            print('车辆派遣成本为:', f1)
-            print('车辆运输成本为:', f2)
-            print('制冷成本为:', f3)
-            print('碳排放量为：', carbon_emission)
-            print('碳排放成本为:', f4)
-            print('时间窗惩罚成本为:', f5)
-            print('总运输距离为:', f2 / self.data_bag.c2)
-
-            print('=======================================================================================')
-            print('考虑时空聚类初始解如下: ============================')
-            print('共需要{}辆车'.format(len(self.in_st)))
-            for i in range(len(self.in_st)):
-                print('第{}辆车的路线为'.format(i + 1), self.in_st[i])
-                temp = []
-                temp.append(self.in_st[i])
-                f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(temp, time_variable)
-                print('第{}辆车的派遣成本为：'.format(i + 1), f1)
-                print('第{}辆车的运输成本为：'.format(i + 1), f2)
-                print('第{}辆车的制冷成本为：'.format(i + 1), f3)
-                print('第{}辆车的碳排放量为：'.format(i + 1), carbon_emission)
-                print('第{}辆车的时间窗惩罚成本为：'.format(i + 1), f5)
-                print('第{}辆车的总成本(不包含碳排放量)为：'.format(i + 1), f1 + f2 + f3 + f5)
-            f1, f2, f3, f4, f5, _, carbon_emission = self.cal_fitness(self.in_st, time_variable)
-            print('总成本为:', f1 + f2 + f3 + f4 + f5)
-            print('车辆派遣成本为:', f1)
-            print('车辆运输成本为:', f2)
-            print('制冷成本为:', f3)
-            print('碳排放量为:', carbon_emission)
-            print('碳排放成本为:', f4)
-            print('时间窗惩罚成本为:', f5)
-            print('总运输距离为:', f2 / self.data_bag.c2)
+            # label = "普通遗传算法联合取送一体化情境下"
+            # print_message(self.individual1, label, time_variable, self)
+            label = "改进遗传算法联合取送一体化情境下"
+            print_message(self.individual, label, time_variable, self)
+            # label = "不考虑时空聚类初始解如下"
+            # print_message(self.in_no_st, label, time_variable, self)
+            # label = "考虑时空聚类的解如下"
+            # print_message(self.in_st, label, time_variable, self)
+            # print(f'联合取送一体化情境下,算法总耗时:{time() - begin}秒')
 
             print('=======================================================================================')
             print('画图中，请稍等...')

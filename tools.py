@@ -150,7 +150,7 @@ def get_punish_coefficient(level):
 # 用来裁剪有问题的数据
 def clip(y):
     for i in range(len(y)):
-        if y[i] > 10000:
+        if y[i] > 12000:
             y[i] -= 1000000
 
 # if __name__ == '__main__':
