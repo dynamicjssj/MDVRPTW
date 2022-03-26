@@ -35,6 +35,10 @@ def get_time(route, time_variable, ga):  # 时间需要分情况讨论，时变�
             current_time, fuel_cost = cal_varying_time(current_time,
                                                        ga.data_bag.dis_mat[route[i]][route[i - 1]],
                                                        ga.data_bag.coe_list)
+            # 这里加入服务时间
+            sij = (ga.data_bag.data['交付需求/t'][route[i - 1]] + ga.data_bag.data['取件需求/t'][
+                route[i - 1]]) / ga.data_bag.v2
+            current_time += sij
             time_route += transform_time(current_time)
             time_route += '-'
         end_time,_ = cal_varying_time(current_time,
@@ -47,6 +51,10 @@ def get_time(route, time_variable, ga):  # 时间需要分情况讨论，时变�
         for i in range(1, len(route)-1):  # 从第一个客户点开始计时
             current_time += (ga.data_bag.dis_mat[route[i]][
                                  route[i - 1]] / ga.data_bag.v1)
+            # 这里加入服务时间
+            sij = (ga.data_bag.data['交付需求/t'][route[i - 1]] + ga.data_bag.data['取件需求/t'][
+                route[i - 1]]) / ga.data_bag.v2
+            current_time += sij
             temp = transform_time(current_time)
             time_route += temp
             time_route += '-'

@@ -75,7 +75,7 @@ def adaptive_function_v(event):
 
 def analysis_carbon_price(event):
     exit_home()
-    analysisCarbonPrice(data=data)
+    carbon_price,carbon_cost,total_price= analysisCarbonPrice(data=data)
 
 
 def analysis_carbon_quotas(event):
