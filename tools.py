@@ -151,7 +151,7 @@ def get_punish_coefficient(level):
 def clip(y):
     for i in range(len(y)):
         if y[i] > 12000:
-            y[i] -= 1000000
+            y[i] = y[i-1]
 
 # if __name__ == '__main__':
 #     coe_list = get_coefficient_list()
