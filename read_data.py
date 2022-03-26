@@ -14,22 +14,22 @@ class ReadData:
         self.m = 36  # 客户数量
         self.n = 3  # 仓库数量
         self.v1 = 35  # 车辆k行驶的平均速km/h
-        self.v2 = 240  # 装卸料速度	t/h
+        self.v2 = 1500  # 装卸料速度	t/h
         self.p_0 = 0.165  # 车辆k空载时的单位距离油耗	L/km
         self.p_star = 0.377  # 车辆k满载时的单位距离油耗	L/km
         self.alpha_1 = 2  # 制冷设备在运输过程中单位时间的燃料消耗量	L/h
         self.alpha_2 = 2.5  # 制冷设备卸货时单位时间燃料消耗量	L/h
-        self.Q = 1100  # 配送车辆ｋ的最大载重量	t
+        self.Q = 1100  # 配送车辆ｋ的最大载重量
 
         self.c1 = 200  # 每辆车的派遣成本	RMB/car
         self.c2 = 5  # 单位距离运输成本	RMB/km
-        self.c3 = 6.68  # 单位燃油价格	RMB/L
+        self.c3 = 16.68  # 单位燃油价格	RMB/L
         self.c4 = 30  # 提前到达的车辆的单位时间等待成本	RMB/h
-        self.c5 = 50  # 迟到的车辆每单位时间的惩罚成本	RMB/h
+        self.c5 = 30  # 迟到的车辆每单位时间的惩罚成本	RMB/h
         self.c6 = 0.25  # 碳价	RMB/kg
         self.c7 = 1
 
-        self.T_q = 50  # 碳排放配额	kg
+        self.T_q = 100  # 碳排放配额	kg
         self.NVC = 43.3  # 燃料的平均低位发热量	GJ/t
         self.CC = 0.0202  # 燃料的单位热值含碳量	tC/GJ
         self.OF = 0.98  # 燃料的碳氧化率	%
@@ -53,12 +53,12 @@ class ReadData:
             for j in range(len(df)):
                 j_x, j_y = df['横坐标/km'][j], df['纵坐标/km'][j]
                 dis_i_j = pow(pow(i_x - j_x, 2) + pow(i_y - j_y, 2), 1 / 2)
-                self.dis_mat[i][j] = dis_i_j * 1.3
+                self.dis_mat[i][j] = dis_i_j
 
         for idx, ware in enumerate(self.w_list):
             for i in range(len(df)):
                 i_x, i_y = df['横坐标/km'][i], df['纵坐标/km'][i]
-                dis_i_ware = pow(pow(i_x - ware[0], 2) + pow(i_y - ware[1], 2), 1 / 2) * 1.3
+                dis_i_ware = pow(pow(i_x - ware[0], 2) + pow(i_y - ware[1], 2), 1 / 2)
                 if idx == 0:
                     self.dis_mat[i]['A'] = dis_i_ware
                     self.dis_mat['A'][i] = dis_i_ware

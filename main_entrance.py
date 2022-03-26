@@ -51,7 +51,7 @@ def adaptive_function(event):
     print("*******正在运行自适应方法(恒定速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, False) # 把这里的第一个参数换成True就能打印输出
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, True, False) # 把这里的第一个参数换成True就能打印输出
     clip(y)
     clip(y_best)
     scatter_func(data, grouped_chromosome)
@@ -64,7 +64,7 @@ def adaptive_function_v(event):
     print("*******正在运行自适应方法(时变速度)**********")
     exit_home()
     ga = GeneticAlgorithm(data)
-    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False, True, True)
+    grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(True, True, True)
     clip(y)
     clip(y_best)
     scatter_func(data, grouped_chromosome)

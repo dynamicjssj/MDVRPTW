@@ -75,7 +75,7 @@ def scatter_func(data, grouped_chromosome):
         for i in range(1, len(x_list)):
 
             plt.arrow(x_list[i - 1], y_list[i - 1], x_list[i] - x_list[i - 1], y_list[i] - y_list[i - 1],
-                      length_includes_head=True, head_width=0.2, lw=0.6,
+                      length_includes_head=True, head_width=0.5, lw=0.8,
                       color=colorVal)
         # plt.plot(
         #             x_list,

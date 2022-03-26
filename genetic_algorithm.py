@@ -19,8 +19,8 @@ from print_func import print_message
 class GeneticAlgorithm:
     def __init__(self, data):
         self.data_bag = data  # 数据
-        self.mutation_pro = 0.2
-        self.cross_pro = 0.7
+        self.mutation_pro = 0.1
+        self.cross_pro = 0.8
         self.popsize = 100
         self.max_iterations = 100
         self.pop = []  # 种群
@@ -41,7 +41,7 @@ class GeneticAlgorithm:
 
     def init_chrom_by_time_and_space(self):
         customers = list(range(self.data_bag.m))
-        theta1, theta2 = 0.5, 0.5
+        theta1, theta2 = 0.6, 0.4
         self.data_bag.distance_matrix()
         time_mat = self.data_bag.time_matrix()
         min_dt, min_ds = float('inf'), float('inf')

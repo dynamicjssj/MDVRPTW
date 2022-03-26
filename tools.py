@@ -137,14 +137,14 @@ def get_punish_coefficient(level):
     c4 = 0  # 提前到的惩罚成本
     c5 = 0  # 迟到的惩罚成本
     if level == 'A':
-        c4 = 50
-        c5 = 50
+        c4 = 15
+        c5 = 15
     elif level == 'B':
-        c4 = 40
-        c5 = 40
+        c4 = 10
+        c5 = 10
     else:
-        c4 = 30
-        c5 = 30
+        c4 = 5
+        c5 = 5
     return c4, c5
 
 # 用来裁剪有问题的数据

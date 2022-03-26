@@ -99,7 +99,7 @@ def print_message(individual, label, time_variable, ga):  # label是打印的标
     # 因为上面的list为全局变量，在打印新的内容时需要清空
     table = PrettyTable(
         ['车辆编号', '配送顺序', '派遣成本', '运输成本', '制冷成本', '时间窗惩罚成本', '总成本(不包括碳排放成本)', '碳排放量', '路程', '载重量', '到达各个配送点时间',
-         '从配送中心出发时间','回到配送中心时间'])
+         '从配送中心出发时间', '回到配送中心时间'])
     for i in range(len(individual)):
         ship_order = get_ship_order(individual[i])
         temp = []
@@ -120,7 +120,7 @@ def print_message(individual, label, time_variable, ga):  # label是打印的标
     print('车辆运输成本为:', np.sum(f2_list))
     print('制冷成本为:', np.sum(f3_list))
     print('碳排放量为:', np.sum(carbon_emission_list))
-    carbon_cost = (np.sum(carbon_emission_list) - ga.data_bag.T_q) * ga.data_bag.c6
+    print('碳排放成本:', (np.sum(carbon_emission_list) - ga.data_bag.T_q)*ga.data_bag.c6)
     print('时间窗惩罚成本为:', np.sum(f5_list))
     print('总运输距离为:', np.sum(f2_list) / ga.data_bag.c2)
 
