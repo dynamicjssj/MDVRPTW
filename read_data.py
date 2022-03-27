@@ -13,7 +13,7 @@ class ReadData:
         self.coe_list = None
         self.m = 36  # 客户数量
         self.n = 3  # 仓库数量
-        self.v1 = 35  # 车辆k行驶的平均速km/h
+        self.v1 = 32.64  # 车辆k行驶的平均速km/h
         self.v2 = 1500  # 装卸料速度	t/h
         self.p_0 = 0.165  # 车辆k空载时的单位距离油耗	L/km
         self.p_star = 0.377  # 车辆k满载时的单位距离油耗	L/km
