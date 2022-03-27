@@ -52,7 +52,7 @@ def analysisCarbonPrice(data):
     plt.ylabel(u"总成本(RMB)")  # Y轴标签
     plt.legend()
     plt.show()
-    return carbon_price,carbon_cost,total_price
+    return carbon_price,carbon_cost,total_cost
 
 def analysisQuotas(data):
     # 碳价对总成本对影响
@@ -110,6 +110,7 @@ def analysisQuotas(data):
     plt.ylabel(u"碳排放量(kg)")  # Y轴标签
     plt.legend(loc="right")
     plt.show()
+    return carbon_quotas,car_cost,carbon_emission
 
 
 def analysisAll(data):
