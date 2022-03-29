@@ -119,9 +119,10 @@ def analysisAll(data):
     fig = plt.figure()
     # 生成子图对象，类型为3d
     ax = fig.gca(projection='3d')
-    car_price = [0.5, 0.75, 1]
+    car_price = [0.25,0.5,0.75,1]
     car_quotas = [0, 50, 100, 150, 200]
     color_ = ['r', 'g', 'b']
+    table = PrettyTable(['碳价','碳配额', '碳排放', '碳排放成本', '总成本'])
     with tqdm(total=len(car_price) * len(car_quotas) * 10) as pbar:
         pbar.set_description('Processing:')
         for i in car_price:
@@ -129,24 +130,29 @@ def analysisAll(data):
             y_pos = []
             hist = []
             color = color_.pop()
+            car_cost =0
             for j in car_quotas:
                 total_price = 0
-                for k in range(10):
+                car_emission =0
+                for k in range(5):
                     data.c6 = i
                     data.T_q = j
                     ga = GeneticAlgorithm(data)
                     grouped_chromosome, in_1, y, y_best, y1, y_best1 = ga.run(False)
                     f1, f2, f3, f4, f5, m, ce = ga.cal_fitness(grouped_chromosome, True)  # f4是碳价
                     total_price += (f1 + f2 + f3 + f4 + f5)  # 总共花费的价格
+                    car_emission += ce # 碳排放量
+                    car_cost += f4
                     pbar.update(1)
-                total_price /= 10
+                total_price /= 5
+                car_emission /= 5
+                car_cost /= 5
+                table.add_row([i, j, car_emission, car_cost,total_price])
                 x_pos.append(i)
                 y_pos.append(j)
                 hist.append(total_price)
                 # 设置坐标轴标签
-            print("car_price =" + str(x_pos))
-            print("car_quotas =" + str(y_pos))
-            print("total_price =" + str(hist))
+            print(table)
             ax.set_xlabel('R')
             ax.set_ylabel('K')
             ax.set_zlabel('Recall')
