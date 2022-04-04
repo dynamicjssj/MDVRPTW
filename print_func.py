@@ -123,7 +123,7 @@ def print_message(individual, label, time_variable, ga):  # label是打印的标
     print(table)
 
     print(individual)
-    print('总成本为:', np.sum(total_cost_list))
+    print('总成本为:', np.sum(total_cost_list)+(np.sum(carbon_emission_list) - ga.data_bag.T_q)*ga.data_bag.c6)
     print('车辆派遣成本为:', np.sum(f1_list))
     print('车辆运输成本为:', np.sum(f2_list))
     print('制冷成本为:', np.sum(f3_list))
