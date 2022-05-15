@@ -22,7 +22,7 @@ class ReadData:
         self.Q = 1100  # 配送车辆ｋ的最大载重量
 
         self.c1 = 200  # 每辆车的派遣成本	RMB/car
-        self.c2 = 5  # 单位距离运输成本	RMB/km
+        self.c2 = 5   # 单位距离运输成本	RMB/km
         self.c3 = 16.68  # 单位燃油价格	RMB/L
         self.c4 = 30  # 提前到达的车辆的单位时间等待成本	RMB/h
         self.c5 = 30  # 迟到的车辆每单位时间的惩罚成本	RMB/h

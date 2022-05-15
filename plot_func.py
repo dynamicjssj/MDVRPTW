@@ -127,9 +127,9 @@ def plot_func(y, y_best):
     n = len(y)
     m = len(y_best)
     y_best += [y_best[-1]] * (n - m)
-    y = y[: n // 2]
-    y_best = y_best[: n // 2]
-    x = list(range(n // 2))
+    # y = y[: n // 2]
+    # y_best = y_best[: n // 2]
+    x = list(range(n))
     plt.plot(
         x,
         y,
@@ -218,5 +218,46 @@ def plot_func(y, y_best):
 #          length_includes_head=True, head_width=0.2, lw=2,
 #          color=colorVal)
 # plt.show()
+if __name__ == '__main__':
+    # import pandas as pd
+    #
+    # df1 = pd.read_excel('自适应1.xls')
+    # df1.head()
+    # x = [i for i in range(0, 501)]
+    # avgFit = []
+    # minFit = []
+    # for i in range(0, 501):
+    #     avgFit.append(df1['平均值'][i])
+    #     minFit.append(df1["最优值"][i])
+    #
+    # plot_func(avgFit , minFit)
+
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    import numpy as np
+    import pylab
+
+    plt.figure(figsize=(40, 16), dpi=80)
+    font_set = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=30)
+    carbon_price = []
+    carbon_emission = []
+    df1 = pd.read_excel('碳价.xls')
+    print(df1.columns)
+    print(df1)
+    for i in range(0, 81):
+        carbon_price.append(df1['碳价'][i])
+        carbon_emission.append(df1['碳排放'][i])
+
+    plt.xticks(size=25)
+    plt.yticks(size=25)
+    plt.xlabel(u"碳价(元/kg)",fontproperties=font_set,fontsize=30)  # X轴标签
+    plt.ylabel(u"碳排放量(Kg)",fontproperties=font_set,fontsize=30)  # Y轴标签
+    plt.plot(carbon_price, carbon_emission, marker='o', ms=10, label=u'碳排放量',lw=3)
+    plt.legend(prop=font_set, fontsize=20, loc='best', markerscale=1, numpoints=1)
+    parameter = np.polyfit(carbon_price, carbon_emission, 4)  # n=1为一次函数，返回函数参数
+    f = np.poly1d(parameter)  # 拼接方程
+    pylab.plot(carbon_price, f(carbon_price), "r.", ms=5)
+    plt.show()
 
 

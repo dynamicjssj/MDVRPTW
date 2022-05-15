@@ -30,8 +30,8 @@ def basic_function(event):
     clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
-    # scatter_func(data, in_1)
-    # plot_func(y1, y_best1)
+    scatter_func(data, in_1)
+    plot_func(y1, y_best1)
 
 
 def basic_function_v(event):
@@ -43,8 +43,8 @@ def basic_function_v(event):
     clip(y_best)
     scatter_func(data, grouped_chromosome)
     plot_func(y, y_best)
-    # scatter_func(data, in_1)
-    # plot_func(y1, y_best1)
+    #scatter_func(data, in_1)
+    #plot_func(y1, y_best1)
 
 
 def adaptive_function(event):

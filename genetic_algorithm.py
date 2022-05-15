@@ -159,7 +159,11 @@ class GeneticAlgorithm:
                     route[i - 1]]) / self.data_bag.v2
                 to_time += sij  # 出发时间更新为到达时间+服务时间
 
-        return f1, f2, f3, f4, f5, self.data_bag.M / (f1 + f2 + f3 + f4 + f5), carbon_emission
+        e1 = 1
+        e2 = 1
+        e3 = 1
+
+        return f1, f2, f3, f4, f5, self.data_bag.M / (e1*(f1 + f3) + f2 + e2*f4 + e3*f5), carbon_emission
 
     def divide_into_group(self, chromosome, time_variable):
         """
