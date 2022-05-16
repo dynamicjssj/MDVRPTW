@@ -135,7 +135,7 @@ class GeneticAlgorithm:
         for route in grouped_chromosome:
             # 出发时间
             to_time = None
-            for i in range(1, len(route)):
+            for i in range(1, len(route)-1):
                 if i == 1:  # 第一个客户到达时间
                     to_time = self.data_bag.data['ET浮点数'][route[1]]
                 else:
@@ -150,7 +150,7 @@ class GeneticAlgorithm:
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
                 else:
-                    self.data_bag.c4, self.data_bag.c5 = get_punish_coefficient(self.data_bag.data["用户等级"][i-1])
+                    self.data_bag.c4, self.data_bag.c5 = get_punish_coefficient(self.data_bag.data["用户等级"][int(route[i])])
                     f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
                                                  0) + self.data_bag.c5 * max(
                         to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
