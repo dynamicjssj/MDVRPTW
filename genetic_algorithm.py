@@ -148,10 +148,7 @@ class GeneticAlgorithm:
                     else:
                         tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
                         to_time += tij
-                sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][
-                    route[i - 1]]) / self.data_bag.v2
-                # print(to_time)
-                to_time += sij  # 出发时间更新为到达时间+服务时间
+
 
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
@@ -160,6 +157,10 @@ class GeneticAlgorithm:
                     f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
                                                  0) + self.data_bag.c5 * max(
                         to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
+                sij = (self.data_bag.data['交付需求/t'][route[i]] + self.data_bag.data['取件需求/t'][
+                    route[i]]) / self.data_bag.v2
+                # print(to_time)
+                to_time += sij  # 出发时间更新为到达时间+服务时间
 
 
         e1 = 1

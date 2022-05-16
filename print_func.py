@@ -36,8 +36,8 @@ def get_time(route, time_variable, ga):  # 时间需要分情况讨论，时变�
                                                        ga.data_bag.dis_mat[route[i]][route[i - 1]],
                                                        ga.data_bag.coe_list)
             # 这里加入服务时间
-            sij = (ga.data_bag.data['交付需求/t'][route[i - 1]] + ga.data_bag.data['取件需求/t'][
-                route[i - 1]]) / ga.data_bag.v2
+            sij = (ga.data_bag.data['交付需求/t'][route[i]] + ga.data_bag.data['取件需求/t'][
+                route[i]]) / ga.data_bag.v2
             current_time += sij
             time_route += transform_time(current_time)
             time_route += '-'
