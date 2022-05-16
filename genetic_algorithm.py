@@ -135,6 +135,7 @@ class GeneticAlgorithm:
         for route in grouped_chromosome:
             # 出发时间
             to_time = None
+
             for i in range(1, len(route)):
                 if i == 1:  # 第一个客户到达时间
                     to_time = self.data_bag.data['ET浮点数'][route[1]]
@@ -147,6 +148,10 @@ class GeneticAlgorithm:
                     else:
                         tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
                         to_time += tij
+                sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][
+                    route[i - 1]]) / self.data_bag.v2
+                # print(to_time)
+                to_time += sij  # 出发时间更新为到达时间+服务时间
 
                 if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
                     f5 += self.data_bag.M
@@ -155,15 +160,44 @@ class GeneticAlgorithm:
                     f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
                                                  0) + self.data_bag.c5 * max(
                         to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
-                sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][
-                    route[i - 1]]) / self.data_bag.v2
-                to_time += sij  # 出发时间更新为到达时间+服务时间
+
 
         e1 = 1
         e2 = 1
         e3 = 1
 
-        return f1, f2, f3, f4, f5, self.data_bag.M / (e1*(f1 + f3) + f2 + e2*f4 + e3*f5), carbon_emission
+        return f1, f2, f3, f4, f5, self.data_bag.M / (e1 * (f1 + f3) + f2 + e2 * f4 + e3 * f5), carbon_emission
+
+    def cal_time_window(self, time_variable=False, route=None):
+        # 出发时间
+        times = []
+        to_time = None
+        f5 = 0
+        for i in range(1, len(route)):
+            if i == 1:  # 第一个客户到达时间
+                to_time = self.data_bag.data['ET浮点数'][route[1]]
+            else:
+                if time_variable:
+                    to_time, _ = cal_varying_time(to_time, self.data_bag.dis_mat[route[i]][route[i - 1]],
+                                                  self.data_bag.coe_list)
+                else:
+                    tij = self.data_bag.dis_mat[route[i]][route[i - 1]] / self.data_bag.v1  # 行驶时间
+                    to_time += tij
+
+            sij = (self.data_bag.data['交付需求/t'][route[i - 1]] + self.data_bag.data['取件需求/t'][
+                route[i - 1]]) / self.data_bag.v2
+            # print(to_time)
+            to_time += sij  # 出发时间更新为到达时间+服务时间
+            times.append(to_time)
+            if to_time > self.data_bag.data['LLT浮点数'][route[i]]:
+                f5 += self.data_bag.M
+            else:
+                self.data_bag.c4, self.data_bag.c5 = get_punish_coefficient(self.data_bag.data["用户等级"][i])
+                f5 += self.data_bag.c4 * max(self.data_bag.data['ET浮点数'][route[i]] - to_time,
+                                             0) + self.data_bag.c5 * max(
+                    to_time - self.data_bag.data['LT浮点数'][route[i]], 0)
+
+        return f5,times
 
     def divide_into_group(self, chromosome, time_variable):
         """
